@@ -58,9 +58,11 @@ export default function Hero() {
                     className="mt-10 flex justify-center gap-6 flex-wrap"
                 >
                     <Button size="lg">Connect Wallet →</Button>
-                    <Button variant="outline" size="lg">
-                        Learn More
-                    </Button>
+                    <a href="#how">
+                        <Button variant="outline" size="lg" >
+                            Learn More
+                        </Button>
+                    </a>
                 </motion.div>
             </motion.div>
         </section>
