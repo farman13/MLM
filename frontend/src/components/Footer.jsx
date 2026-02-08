@@ -1,10 +1,12 @@
+import logo from "../assets/logo.png";
+
 export default function Footer() {
     return (
         <footer className="py-12 border-t border-white/10 bg-black/30 backdrop-blur-md">
             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div className="flex items-center gap-3">
                     <img
-                        src="https://i.ibb.co/3f6y3kP/logo.png"
+                        src={logo}
                         alt="logo"
                         className="w-10"
                     />
