@@ -1,0 +1,198 @@
+import { User } from "../models/user.model.js";
+import ApiError from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import AsyncHandler from "../utils/AsyncHandler.js";
+
+// -----------------------------
+// Register User
+// -----------------------------
+export const registerUser = AsyncHandler(async (req, res) => {
+    const { walletAddress, username, referredByAddress } = req.body;
+
+    if (!walletAddress || !username) {
+        throw new ApiError(400, "walletAddress and username are required");
+    }
+
+    const wallet = walletAddress.toLowerCase();
+    const uname = username.toLowerCase();
+
+    const existingWallet = await User.findOne({ walletAddress: wallet });
+    if (existingWallet) {
+        throw new ApiError(400, "Wallet already registered");
+    }
+
+    const existingUsername = await User.findOne({ username: uname });
+    if (existingUsername) {
+        throw new ApiError(400, "Username already taken");
+    }
+
+    const referrerWallet = referredByAddress
+        ? referredByAddress.toLowerCase()
+        : null;
+
+    const newUser = await User.create({
+        walletAddress: wallet,
+        username: uname,
+        referredByAddress: referrerWallet,
+        directReferrals: [],
+        directReferralCount: 0,
+        totalTeamSize: 0,
+        level: 1,
+        isRegistered: true,
+    });
+
+    // If user has a referrer -> update referrer referral data
+    if (referrerWallet) {
+        const referrer = await User.findOne({ walletAddress: referrerWallet });
+
+        if (referrer) {
+            referrer.directReferrals.push(wallet);
+            referrer.directReferralCount += 1;
+            referrer.totalTeamSize += 1;
+            await referrer.save();
+        }
+    }
+
+    return res
+        .status(201)
+        .json(new ApiResponse(201, newUser, "User registered successfully"));
+});
+
+// -----------------------------
+// Get User By Username
+// -----------------------------
+export const getUserByUsername = AsyncHandler(async (req, res) => {
+    const { username } = req.params;
+
+    if (!username) {
+        throw new ApiError(400, "Username is required");
+    }
+
+    const user = await User.findOne({ username: username.toLowerCase() });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User fetched successfully"));
+});
+
+// -----------------------------
+// Get User By Wallet Address
+// -----------------------------
+export const getUserByWallet = AsyncHandler(async (req, res) => {
+    const { wallet } = req.params;
+
+    if (!wallet) {
+        throw new ApiError(400, "Wallet address is required");
+    }
+
+    const user = await User.findOne({ walletAddress: wallet.toLowerCase() });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User fetched successfully"));
+});
+
+// -----------------------------
+// Update Username
+// -----------------------------
+export const updateUsername = AsyncHandler(async (req, res) => {
+    const { wallet } = req.params;
+    const { username } = req.body;
+
+    if (!wallet) {
+        throw new ApiError(400, "Wallet address is required");
+    }
+
+    if (!username) {
+        throw new ApiError(400, "username is required");
+    }
+
+    const user = await User.findOne({ walletAddress: wallet.toLowerCase() });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const existingUsername = await User.findOne({
+        username: username.toLowerCase(),
+    });
+
+    if (existingUsername) {
+        throw new ApiError(400, "Username already taken");
+    }
+
+    user.username = username.toLowerCase();
+    await user.save();
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "Username updated successfully"));
+});
+
+// -----------------------------
+// Get All Users
+// -----------------------------
+export const getAllUsers = AsyncHandler(async (req, res) => {
+    const users = await User.find().sort({ createdAt: -1 });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, users, "Users fetched successfully"));
+});
+
+// -----------------------------
+// Build Referral Tree Recursively
+// -----------------------------
+const buildTree = async (walletAddress, depth = 0, maxDepth = 10) => {
+    if (depth >= maxDepth) return null;
+
+    const user = await User.findOne({ walletAddress });
+
+    if (!user) return null;
+
+    const children = [];
+
+    for (let childWallet of user.directReferrals) {
+        const childNode = await buildTree(childWallet, depth + 1, maxDepth);
+        if (childNode) children.push(childNode);
+    }
+
+    return {
+        username: user.username,
+        walletAddress: user.walletAddress,
+        level: user.level,
+        directReferralCount: user.directReferralCount,
+        referrals: children,
+    };
+};
+
+// -----------------------------
+// Get Referral Tree by Username
+// -----------------------------
+export const getReferralTreeByUsername = AsyncHandler(async (req, res) => {
+    const { username } = req.params;
+
+    if (!username) {
+        throw new ApiError(400, "Username is required");
+    }
+
+    const user = await User.findOne({ username: username.toLowerCase() });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const tree = await buildTree(user.walletAddress);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, tree, "Referral tree fetched successfully"));
+});
