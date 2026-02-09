@@ -16,7 +16,7 @@ export default function App() {
       <Hero />
       <Features />
       <HowItWorks />
-      <Matrix />
+      {/* <Matrix /> */}
       <Register />
       <Levels />
       <PoolRewards />
