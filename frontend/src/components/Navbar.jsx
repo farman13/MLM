@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "./ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Wallet } from "lucide-react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
@@ -14,15 +15,10 @@ export default function Navbar() {
             className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/50 backdrop-blur-xl"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-
                 {/* Logo */}
                 <div className="flex items-center gap-2">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black flex items-center justify-center border border-white/10">
-                        <img
-                            src="/logo.png"
-                            alt="logo"
-                            className="w-8 sm:w-10"
-                        />
+                        <img src="/logo.png" alt="logo" className="w-8 sm:w-10" />
                     </div>
 
                     <p className="font-bold text-base sm:text-lg tracking-wide">
@@ -48,14 +44,50 @@ export default function Navbar() {
 
                 {/* Right Side */}
                 <div className="flex items-center gap-3">
+                    {/* Connect Wallet Button */}
+                    <ConnectButton.Custom>
+                        {({
+                            account,
+                            chain,
+                            openAccountModal,
+                            openConnectModal,
+                            mounted,
+                        }) => {
+                            const ready = mounted;
+                            const connected = ready && account && chain;
 
-                    {/* Connect Button Responsive */}
-                    <Button
-                        size="sm"
-                        className="px-4 sm:px-6 py-2 text-sm sm:text-base rounded-xl sm:rounded-2xl"
-                    >
-                        Connect
-                    </Button>
+                            return (
+                                <div
+                                    {...(!ready && {
+                                        "aria-hidden": true,
+                                        style: {
+                                            opacity: 0,
+                                            pointerEvents: "none",
+                                            userSelect: "none",
+                                        },
+                                    })}
+                                >
+                                    {!connected ? (
+                                        <Button
+                                            className="flex gap-2"
+                                            onClick={openConnectModal}
+                                        >
+                                            <Wallet size={18} />
+                                            Connect Wallet
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            size="sm"
+                                            className="px-4 sm:px-6 py-2 text-sm sm:text-base rounded-xl"
+                                            onClick={openAccountModal}
+                                        >
+                                            Connected
+                                        </Button>
+                                    )}
+                                </div>
+                            );
+                        }}
+                    </ConnectButton.Custom>
 
                     {/* Mobile Menu Icon */}
                     <button
@@ -110,7 +142,49 @@ export default function Navbar() {
                                 Pool
                             </a>
 
-                            <Button className="w-full">Connect Wallet</Button>
+                            {/* Mobile Connect Wallet */}
+                            <ConnectButton.Custom>
+                                {({
+                                    account,
+                                    chain,
+                                    openAccountModal,
+                                    openConnectModal,
+                                    mounted,
+                                }) => {
+                                    const ready = mounted;
+                                    const connected = ready && account && chain;
+
+                                    return (
+                                        <div
+                                            {...(!ready && {
+                                                "aria-hidden": true,
+                                                style: {
+                                                    opacity: 0,
+                                                    pointerEvents: "none",
+                                                    userSelect: "none",
+                                                },
+                                            })}
+                                        >
+                                            {!connected ? (
+                                                <Button
+                                                    className="w-full flex gap-2"
+                                                    onClick={openConnectModal}
+                                                >
+                                                    <Wallet size={20} />
+                                                    Connect Wallet
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    className="w-full"
+                                                    onClick={openAccountModal}
+                                                >
+                                                    Connected
+                                                </Button>
+                                            )}
+                                        </div>
+                                    );
+                                }}
+                            </ConnectButton.Custom>
                         </div>
                     </motion.div>
                 )}

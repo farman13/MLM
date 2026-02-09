@@ -73,7 +73,7 @@ export default function Hero() {
                                 >
                                     {!connected ? (
                                         <Button size="lg" onClick={openConnectModal}>
-                                            Connect Wallet →
+                                            Connect Wallet
                                         </Button>
                                     ) : (
                                         <div className="flex gap-3 flex-wrap justify-center">
@@ -89,7 +89,7 @@ export default function Hero() {
 
                     <a href="#how">
                         <Button variant="outline" size="lg">
-                            Learn More
+                            Learn More →
                         </Button>
                     </a>
                 </motion.div>
