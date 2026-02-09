@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:3000/api/v1/users/tree";
+// const API_BASE = "http://localhost:3000/api/v1/users/tree";
+const API_BASE = "https://mlm-tmsz.vercel.app/api/v1/users/tree";
+
 
 function TreeNode({ node }) {
     return (
