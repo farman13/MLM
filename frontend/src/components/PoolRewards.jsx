@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Trophy, Users, DollarSign, RefreshCcw } from "lucide-react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function PoolRewards() {
     const currentUsers = 0;
@@ -96,9 +97,33 @@ export default function PoolRewards() {
                                     </div>
                                 </div>
 
-                                <Button size="lg" className="w-full mt-12">
-                                    Connect Wallet to Join - $5
-                                </Button>
+                                <ConnectButton.Custom>
+                                    {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
+                                        const ready = mounted;
+                                        const connected = ready && account && chain;
+
+                                        return (
+                                            <div
+                                                {...(!ready && {
+                                                    "aria-hidden": true,
+                                                    style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
+                                                })}
+                                            >
+                                                {!connected ? (
+                                                    <Button size="lg" className="w-full flex gap-2 m-6" onClick={openConnectModal}>
+                                                        Connect Wallet to Join Pool
+                                                    </Button>
+                                                ) : (
+                                                    <div className="flex gap-3 flex-wrap justify-center">
+                                                        <Button size="lg" className="w-full flex gap-2" >
+                                                            pay $5 to join
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }}
+                                </ConnectButton.Custom>
 
                                 <p className="text-center text-gray-500 text-sm mt-3">
                                     ≈ 0.0077 BNB
