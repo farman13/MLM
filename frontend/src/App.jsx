@@ -7,6 +7,7 @@ import Register from "./components/Register";
 import Levels from "./components/Levels";
 import PoolRewards from "./components/PoolRewards";
 import Footer from "./components/Footer";
+import ReferralTree from "./components/ReferralTree";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
       <Register />
       <Levels />
       <PoolRewards />
+      <ReferralTree />
       <Footer />
     </div>
   );
