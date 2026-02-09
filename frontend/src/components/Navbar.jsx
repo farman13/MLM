@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import logo from "../assets/logo.png";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Navbar() {
     return (
@@ -38,8 +39,33 @@ export default function Navbar() {
                         Pool
                     </a>
                 </div>
+                <ConnectButton.Custom>
+                    {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
+                        const ready = mounted;
+                        const connected = ready && account && chain;
 
-                <Button size="lg">Connect Wallet</Button>
+                        return (
+                            <div
+                                {...(!ready && {
+                                    "aria-hidden": true,
+                                    style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
+                                })}
+                            >
+                                {!connected ? (
+                                    <Button size="lg" onClick={openConnectModal}>
+                                        Connect Wallet
+                                    </Button>
+                                ) : (
+                                    <div className="flex gap-3 flex-wrap justify-center">
+                                        <Button size="lg" onClick={openAccountModal}>
+                                            Connected
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }}
+                </ConnectButton.Custom>
             </div>
         </motion.nav>
     );

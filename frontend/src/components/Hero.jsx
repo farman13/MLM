@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import logo from "../assets/logo.png";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Hero() {
     return (
@@ -57,9 +58,37 @@ export default function Hero() {
                     transition={{ delay: 0.8, duration: 0.8 }}
                     className="mt-10 flex justify-center gap-6 flex-wrap"
                 >
-                    <Button size="lg">Connect Wallet →</Button>
+                    {/* RainbowKit Button with your theme */}
+                    <ConnectButton.Custom>
+                        {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
+                            const ready = mounted;
+                            const connected = ready && account && chain;
+
+                            return (
+                                <div
+                                    {...(!ready && {
+                                        "aria-hidden": true,
+                                        style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
+                                    })}
+                                >
+                                    {!connected ? (
+                                        <Button size="lg" onClick={openConnectModal}>
+                                            Connect Wallet →
+                                        </Button>
+                                    ) : (
+                                        <div className="flex gap-3 flex-wrap justify-center">
+                                            <Button size="lg" onClick={openAccountModal}>
+                                                Connected
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }}
+                    </ConnectButton.Custom>
+
                     <a href="#how">
-                        <Button variant="outline" size="lg" >
+                        <Button variant="outline" size="lg">
                             Learn More
                         </Button>
                     </a>

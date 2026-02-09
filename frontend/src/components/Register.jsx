@@ -2,8 +2,10 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Wallet } from "lucide-react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Register() {
+
     return (
         <section className="py-28">
             <div className="max-w-6xl mx-auto px-6">
@@ -51,10 +53,34 @@ export default function Register() {
                             </div>
 
                             <div className="mt-10">
-                                <Button size="lg" className="w-full flex gap-2">
-                                    <Wallet size={22} />
-                                    Connect Wallet to Register
-                                </Button>
+                                <ConnectButton.Custom>
+                                    {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
+                                        const ready = mounted;
+                                        const connected = ready && account && chain;
+
+                                        return (
+                                            <div
+                                                {...(!ready && {
+                                                    "aria-hidden": true,
+                                                    style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
+                                                })}
+                                            >
+                                                {!connected ? (
+                                                    <Button size="lg" className="w-full flex gap-2" onClick={openConnectModal}>
+                                                        <Wallet size={22} />
+                                                        Connect Wallet to Register
+                                                    </Button>
+                                                ) : (
+                                                    <div className="flex gap-3 flex-wrap justify-center">
+                                                        <Button size="lg" className="w-full flex gap-2" >
+                                                            Register Now
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }}
+                                </ConnectButton.Custom>
 
                                 <p className="text-center text-gray-500 text-sm mt-3">
                                     Smart contract handles everything automatically.

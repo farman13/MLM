@@ -5,20 +5,17 @@ import { Button } from "./ui/button";
 
 export default function Levels() {
     const levels = [
-        { level: 1, cost: 15, earn: null },
-        { level: 2, cost: 20, earn: 40 },
-        { level: 3, cost: 40, earn: 80 },
-        { level: 4, cost: 100, earn: 140 },
-        { level: 5, cost: 200, earn: 400 },
-        { level: 6, cost: 400, earn: 800 },
-        { level: 7, cost: 800, earn: 1600 },
-        { level: 8, cost: 1800, earn: 3000 },
-        { level: 9, cost: 3000, earn: 7800 },
-        { level: 10, cost: 5000, earn: 13000 },
-        { level: 11, cost: 8000, earn: 22000 },
-        { level: 12, cost: 13000, earn: 35000 },
-        { level: 13, cost: 25000, earn: 53000 },
-        { level: 14, cost: 50000, earn: 100000 },
+        { level: 0, cost: 15, earn: null },
+        { level: 1, cost: 20, earn: 10 },
+        { level: 2, cost: 40, earn: 40 },
+        { level: 3, cost: 100, earn: 220 },
+        { level: 4, cost: 200, earn: 1400 },
+        { level: 5, cost: 400, earn: 6000 },
+        { level: 6, cost: 800, earn: 24800 },
+        { level: 7, cost: 1600, earn: 100800 },
+        { level: 8, cost: 3200, earn: 406400 },
+        { level: 9, cost: 6400, earn: 1632000 },
+        { level: 10, cost: 12800, earn: 6540800 },
     ];
 
     return (
@@ -58,8 +55,8 @@ export default function Levels() {
                         >
                             <Card
                                 className={`hover:scale-[1.03] transition-all ${item.level === 14
-                                        ? "border-yellow-400/40 shadow-yellow-400/20"
-                                        : "border-white/10"
+                                    ? "border-yellow-400/40 shadow-yellow-400/20"
+                                    : "border-white/10"
                                     }`}
                             >
                                 <CardContent className="p-7">
@@ -76,9 +73,11 @@ export default function Levels() {
                                         )}
                                     </div>
 
-                                    <p className="text-gray-500 mt-2 text-sm">
-                                        👥 6 referrals to complete
-                                    </p>
+                                    {(item.level === 1 || item.level === 5) && (
+                                        <p className="text-gray-500 mt-2 text-sm">
+                                            👥 {item.level === 1 ? 2 : 5} new referrals to complete
+                                        </p>
+                                    )}
 
                                     <div className="mt-6">
                                         <p className="text-gray-400 text-sm">Level Cost</p>
