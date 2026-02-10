@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "./ui/button";
 import { Menu, X, Wallet } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
+    const { token, authLoading } = useAuth();
 
     return (
         <motion.nav
@@ -44,15 +46,8 @@ export default function Navbar() {
 
                 {/* Right Side */}
                 <div className="flex items-center gap-3">
-                    {/* Connect Wallet Button */}
                     <ConnectButton.Custom>
-                        {({
-                            account,
-                            chain,
-                            openAccountModal,
-                            openConnectModal,
-                            mounted,
-                        }) => {
+                        {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
                             const ready = mounted;
                             const connected = ready && account && chain;
 
@@ -68,10 +63,7 @@ export default function Navbar() {
                                     })}
                                 >
                                     {!connected ? (
-                                        <Button
-                                            className="flex gap-2"
-                                            onClick={openConnectModal}
-                                        >
+                                        <Button className="flex gap-2" onClick={openConnectModal}>
                                             <Wallet size={18} />
                                             Connect Wallet
                                         </Button>
@@ -80,8 +72,9 @@ export default function Navbar() {
                                             size="sm"
                                             className="px-4 sm:px-6 py-2 text-sm sm:text-base rounded-xl"
                                             onClick={openAccountModal}
+                                            disabled={authLoading}
                                         >
-                                            Connected
+                                            {authLoading ? "Signing..." : "Connected"}
                                         </Button>
                                     )}
                                 </div>
@@ -89,11 +82,8 @@ export default function Navbar() {
                         }}
                     </ConnectButton.Custom>
 
-                    {/* Mobile Menu Icon */}
-                    <button
-                        className="md:hidden text-white"
-                        onClick={() => setOpen(!open)}
-                    >
+                    {/* Mobile Menu */}
+                    <button className="md:hidden text-white" onClick={() => setOpen(!open)}>
                         {open ? <X size={26} /> : <Menu size={26} />}
                     </button>
                 </div>
@@ -110,47 +100,21 @@ export default function Navbar() {
                         className="md:hidden border-t border-white/10 bg-black/70 backdrop-blur-xl"
                     >
                         <div className="flex flex-col gap-6 px-6 py-6 text-gray-300 font-medium">
-                            <a
-                                href="#features"
-                                onClick={() => setOpen(false)}
-                                className="hover:text-yellow-400 transition"
-                            >
+                            <a href="#features" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
                                 Features
                             </a>
-
-                            <a
-                                href="#how"
-                                onClick={() => setOpen(false)}
-                                className="hover:text-yellow-400 transition"
-                            >
+                            <a href="#how" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
                                 How It Works
                             </a>
-
-                            <a
-                                href="#levels"
-                                onClick={() => setOpen(false)}
-                                className="hover:text-yellow-400 transition"
-                            >
+                            <a href="#levels" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
                                 Levels
                             </a>
-
-                            <a
-                                href="#pool"
-                                onClick={() => setOpen(false)}
-                                className="hover:text-yellow-400 transition"
-                            >
+                            <a href="#pool" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
                                 Pool
                             </a>
 
-                            {/* Mobile Connect Wallet */}
                             <ConnectButton.Custom>
-                                {({
-                                    account,
-                                    chain,
-                                    openAccountModal,
-                                    openConnectModal,
-                                    mounted,
-                                }) => {
+                                {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
                                     const ready = mounted;
                                     const connected = ready && account && chain;
 
@@ -166,19 +130,13 @@ export default function Navbar() {
                                             })}
                                         >
                                             {!connected ? (
-                                                <Button
-                                                    className="w-full flex gap-2"
-                                                    onClick={openConnectModal}
-                                                >
+                                                <Button className="w-full flex gap-2" onClick={openConnectModal}>
                                                     <Wallet size={20} />
                                                     Connect Wallet
                                                 </Button>
                                             ) : (
-                                                <Button
-                                                    className="w-full"
-                                                    onClick={openAccountModal}
-                                                >
-                                                    Connected
+                                                <Button className="w-full" onClick={openAccountModal} disabled={authLoading}>
+                                                    {authLoading ? "Signing..." : "Connected"}
                                                 </Button>
                                             )}
                                         </div>

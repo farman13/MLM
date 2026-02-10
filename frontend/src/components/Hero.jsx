@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import logo from "../assets/logo.png";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Hero() {
+    const { token, authLoading } = useAuth();
+
     return (
         <section className="pt-36 pb-24 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#1b1b1b,#070a0f)] opacity-90"></div>
@@ -58,7 +61,7 @@ export default function Hero() {
                     transition={{ delay: 0.8, duration: 0.8 }}
                     className="mt-10 flex justify-center gap-6 flex-wrap"
                 >
-                    {/* RainbowKit Button with your theme */}
+                    {/* Wallet Button */}
                     <ConnectButton.Custom>
                         {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
                             const ready = mounted;
@@ -68,7 +71,11 @@ export default function Hero() {
                                 <div
                                     {...(!ready && {
                                         "aria-hidden": true,
-                                        style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
+                                        style: {
+                                            opacity: 0,
+                                            pointerEvents: "none",
+                                            userSelect: "none",
+                                        },
                                     })}
                                 >
                                     {!connected ? (
@@ -76,11 +83,12 @@ export default function Hero() {
                                             Connect Wallet
                                         </Button>
                                     ) : (
-                                        <div className="flex gap-3 flex-wrap justify-center">
-                                            <Button size="lg" onClick={openAccountModal}>
-                                                Connected
-                                            </Button>
-                                        </div>
+                                        <Button size="lg" onClick={openAccountModal} disabled={authLoading}>
+                                            {authLoading
+                                                ? "Signing..."
+                                                : "Connected"
+                                            }
+                                        </Button>
                                     )}
                                 </div>
                             );

@@ -40,7 +40,7 @@ export default function Levels() {
                     transition={{ duration: 0.7, delay: 0.2 }}
                     className="text-center text-gray-400 mt-4 max-w-3xl mx-auto"
                 >
-                    Upgrade through all 14 levels. Each upgrade pays rewards instantly on
+                    Upgrade through all 10 levels. Each upgrade pays rewards instantly on
                     chain.
                 </motion.p>
 

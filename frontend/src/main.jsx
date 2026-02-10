@@ -6,13 +6,15 @@ import './index.css'
 import App from './App.jsx'
 import { RainbowKitRoot } from './components/provider/RainbowKitRoot.jsx'
 import { PoolWeb3Provider } from './context/PoolWeb3Provider.jsx';
+import AuthProvider from './context/AuthProvider.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <RainbowKitRoot>
+  <RainbowKitRoot>
+    <AuthProvider>
       <PoolWeb3Provider>
         <App />
       </PoolWeb3Provider>
-    </RainbowKitRoot>
-  </StrictMode>,
+    </AuthProvider>
+  </RainbowKitRoot>
 )
+

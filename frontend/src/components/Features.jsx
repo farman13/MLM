@@ -15,7 +15,7 @@ export default function Features() {
             icon: <Zap className="text-yellow-400" size={28} />,
         },
         {
-            title: "14 Level Matrix",
+            title: "10 Level Matrix",
             desc: "Earn up to $100,000 per upgrade",
             icon: <TrendingUp className="text-yellow-400" size={28} />,
         },

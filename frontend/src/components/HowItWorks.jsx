@@ -15,7 +15,7 @@ export default function HowItWorks() {
         {
             num: "3",
             title: "Upgrade Levels",
-            desc: "Progress through 14 levels, earning rewards with each upgrade.",
+            desc: "Progress through 10 levels, earning rewards with each upgrade.",
             icon: "⬆️",
         },
         {
