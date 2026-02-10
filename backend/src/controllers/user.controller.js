@@ -2,7 +2,7 @@ import { User } from "../models/user.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import AsyncHandler from "../utils/AsyncHandler.js";
-
+import { createToken } from "./auth.controller.js";
 // -----------------------------
 // Register User
 // -----------------------------
@@ -41,22 +41,43 @@ export const registerUser = AsyncHandler(async (req, res) => {
         isRegistered: true,
     });
 
-    // If user has a referrer -> update referrer referral data
+    // update referrer
     if (referrerWallet) {
         const referrer = await User.findOne({ walletAddress: referrerWallet });
 
         if (referrer) {
-            referrer.directReferrals.push(wallet);
-            referrer.directReferralCount += 1;
-            referrer.totalTeamSize += 1;
-            await referrer.save();
+            if (!referrer.directReferrals.includes(wallet)) {
+                referrer.directReferrals.push(wallet);
+                referrer.directReferralCount += 1;
+                referrer.totalTeamSize += 1;
+                await referrer.save();
+            }
         }
     }
 
-    return res
-        .status(201)
-        .json(new ApiResponse(201, newUser, "User registered successfully"));
+    // ✅ create jwt after registration
+    const isAdmin =
+        wallet === process.env.ADMIN_WALLET?.toLowerCase();
+
+    const token = createToken({
+        walletAddress: wallet,
+        username: newUser.username,
+        role: isAdmin ? "admin" : "user",
+    });
+
+    return res.status(201).json(
+        new ApiResponse(
+            201,
+            {
+                user: newUser,
+                token,
+                role: isAdmin ? "admin" : "user",
+            },
+            "User registered successfully"
+        )
+    );
 });
+
 
 // -----------------------------
 // Get User By Username
@@ -195,4 +216,40 @@ export const getReferralTreeByUsername = AsyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, tree, "Referral tree fetched successfully"));
+});
+
+// -----------------------------
+// Get Logged-in User Profile (ME)
+// -----------------------------
+export const getMe = AsyncHandler(async (req, res) => {
+    const wallet = req.user.walletAddress;
+
+    const user = await User.findOne({ walletAddress: wallet });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User profile fetched successfully"));
+});
+
+// -----------------------------
+// Get Logged-in User Referral Tree (ME)
+// -----------------------------
+export const getMyReferralTree = AsyncHandler(async (req, res) => {
+    const wallet = req.user.walletAddress;
+
+    const user = await User.findOne({ walletAddress: wallet });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const tree = await buildTree(user.walletAddress);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, tree, "My referral tree fetched successfully"));
 });

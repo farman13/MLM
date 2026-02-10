@@ -6,12 +6,22 @@ import {
     updateUsername,
     getAllUsers,
     getReferralTreeByUsername,
+    getMe,
+    getMyReferralTree,
 } from "../controllers/user.controller.js";
+
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const userRouter = express.Router();
 
 // Register user
 userRouter.post("/register", registerUser);
+
+// Get logged-in user
+userRouter.get("/me", verifyJWT, getMe);
+
+// Get logged-in user referral tree
+userRouter.get("/me/tree", verifyJWT, getMyReferralTree);
 
 // Get all users
 userRouter.get("/all", getAllUsers);
