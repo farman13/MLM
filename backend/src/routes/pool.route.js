@@ -5,15 +5,13 @@ import {
     getAllRounds,
 } from "../controllers/pool.controller.js";
 
-const router = express.Router();
+import { verifyJWT, verifyAdmin } from "../middlewares/auth.middleware.js";
 
-// Get current active round
-router.get("/current", getCurrentRound);
+const poolRouter = express.Router();
 
-// Get all rounds history
-router.get("/all", getAllRounds);
+// Admin Protected Routes
+poolRouter.get("/current", verifyJWT, verifyAdmin, getCurrentRound);
+poolRouter.get("/all", verifyJWT, verifyAdmin, getAllRounds);
+poolRouter.get("/round/:roundId", verifyJWT, verifyAdmin, getRoundById);
 
-// Get round by roundId
-router.get("/round/:roundId", getRoundById);
-
-export default router;
+export default poolRouter;
