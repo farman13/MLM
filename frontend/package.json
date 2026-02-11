@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "ethers": "^6.16.0",
     "framer-motion": "^12.33.0",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-d3-tree": "^3.6.6",

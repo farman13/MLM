@@ -1,13 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "./ui/button";
 import { Menu, X, Wallet } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAuth } from "../context/AuthProvider";
+import { Link } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
     const { token, authLoading } = useAuth();
+
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // ✅ check admin from token
+    useEffect(() => {
+        if (!token) {
+            setIsAdmin(false);
+            return;
+        }
+
+        try {
+            const decoded = jwtDecode(token);
+
+            if (decoded?.role === "admin") {
+                setIsAdmin(true);
+            } else {
+                setIsAdmin(false);
+            }
+        } catch (err) {
+            setIsAdmin(false);
+        }
+    }, [token]);
 
     return (
         <motion.nav
@@ -42,6 +66,15 @@ export default function Navbar() {
                     <a href="#pool" className="hover:text-white transition">
                         Pool
                     </a>
+
+                    {/* ✅ Admin Button */}
+                    {isAdmin && (
+                        <Link to="/admin">
+                            <span className="text-yellow-400 hover:text-yellow-300 transition font-semibold">
+                                Admin
+                            </span>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Right Side */}
@@ -100,18 +133,43 @@ export default function Navbar() {
                         className="md:hidden border-t border-white/10 bg-black/70 backdrop-blur-xl"
                     >
                         <div className="flex flex-col gap-6 px-6 py-6 text-gray-300 font-medium">
-                            <a href="#features" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
+                            <a
+                                href="#features"
+                                onClick={() => setOpen(false)}
+                                className="hover:text-yellow-400 transition"
+                            >
                                 Features
                             </a>
-                            <a href="#how" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
+                            <a
+                                href="#how"
+                                onClick={() => setOpen(false)}
+                                className="hover:text-yellow-400 transition"
+                            >
                                 How It Works
                             </a>
-                            <a href="#levels" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
+                            <a
+                                href="#levels"
+                                onClick={() => setOpen(false)}
+                                className="hover:text-yellow-400 transition"
+                            >
                                 Levels
                             </a>
-                            <a href="#pool" onClick={() => setOpen(false)} className="hover:text-yellow-400 transition">
+                            <a
+                                href="#pool"
+                                onClick={() => setOpen(false)}
+                                className="hover:text-yellow-400 transition"
+                            >
                                 Pool
                             </a>
+
+                            {/* ✅ Admin Button Mobile */}
+                            {isAdmin && (
+                                <Link to="/admin" onClick={() => setOpen(false)}>
+                                    <Button className="w-full bg-yellow-400 text-black hover:bg-yellow-300">
+                                        Admin Dashboard
+                                    </Button>
+                                </Link>
+                            )}
 
                             <ConnectButton.Custom>
                                 {({ account, chain, openAccountModal, openConnectModal, mounted }) => {

@@ -4,10 +4,9 @@ import axios from "axios";
 import { useAuth } from "../context/AuthProvider";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { API_BASE } from "../lib/utils";
-
+import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {
     const { token } = useAuth();
@@ -40,6 +39,21 @@ export default function AdminDashboard() {
     return (
         <section className="pt-28 pb-20 min-h-screen bg-black text-white">
             <div className="max-w-7xl mx-auto px-6">
+
+                {/* NAVBAR */}
+                <div className="flex justify-between items-center mb-10 border-b border-white/10 pb-6">
+
+                    <div className="flex gap-4">
+                        <Link to="/">
+                            <Button variant="outline">← Back to Home</Button>
+                        </Link>
+
+                        <Button onClick={fetchRounds} disabled={loading}>
+                            {loading ? "Refreshing..." : "Refresh"}
+                        </Button>
+                    </div>
+                </div>
+
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -52,12 +66,6 @@ export default function AdminDashboard() {
                     <p className="text-gray-400 mt-3">
                         View pool rounds history and winner details.
                     </p>
-
-                    <div className="mt-8 flex gap-4 flex-wrap">
-                        <Button onClick={fetchRounds} disabled={loading}>
-                            {loading ? "Refreshing..." : "Refresh Data"}
-                        </Button>
-                    </div>
 
                     {/* ROUNDS TABLE */}
                     <div className="mt-10 overflow-x-auto border border-white/10 rounded-2xl">
@@ -77,10 +85,7 @@ export default function AdminDashboard() {
                             <tbody>
                                 {rounds.length === 0 && !loading && (
                                     <tr>
-                                        <td
-                                            colSpan="7"
-                                            className="text-center py-10 text-gray-500"
-                                        >
+                                        <td colSpan="7" className="text-center py-10 text-gray-500">
                                             No rounds found.
                                         </td>
                                     </tr>
