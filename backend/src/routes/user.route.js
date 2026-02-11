@@ -8,6 +8,7 @@ import {
     getReferralTreeByUsername,
     getMe,
     getMyReferralTree,
+    validateReferrer,
 } from "../controllers/user.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -19,6 +20,9 @@ userRouter.post("/register", registerUser);
 
 // Get logged-in user
 userRouter.get("/me", verifyJWT, getMe);
+
+// Validate referrer
+userRouter.get("/validate-referrer/:wallet", validateReferrer);
 
 // Get logged-in user referral tree
 userRouter.get("/me/tree", verifyJWT, getMyReferralTree);

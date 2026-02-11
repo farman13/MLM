@@ -253,3 +253,24 @@ export const getMyReferralTree = AsyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, tree, "My referral tree fetched successfully"));
 });
+
+// -----------------------------
+// Validate Referrer Wallet
+// -----------------------------
+export const validateReferrer = AsyncHandler(async (req, res) => {
+    const { wallet } = req.params;
+
+    if (!wallet) {
+        throw new ApiError(400, "Wallet address is required");
+    }
+
+    const user = await User.findOne({ walletAddress: wallet.toLowerCase() });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            { valid: !!user },
+            user ? "Valid referrer" : "Invalid referrer"
+        )
+    );
+});
