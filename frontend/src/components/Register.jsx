@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
@@ -8,6 +8,9 @@ import { useAccount } from "wagmi";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthProvider";
+import { useMLMWeb3 } from "../context/MLMWeb3Provider";
+import useBnbPrice from "../hooks/useBnbPrice";
+import { ethers } from "ethers";
 
 import {
     Dialog,
@@ -16,19 +19,27 @@ import {
     DialogTitle,
     DialogDescription,
 } from "./ui/dialog";
-import { API_BASE } from "../lib/utils";
 
+import { API_BASE } from "../lib/utils";
 
 export default function Register() {
     const { address, isConnected } = useAccount();
 
-    // ✅ added setAuthToken
     const { token, authLoading, setAuthToken } = useAuth();
+    const { registerUserOnChain } = useMLMWeb3();
+    const { bnbPrice, loadingPrice } = useBnbPrice();
 
     const [open, setOpen] = useState(false);
     const [username, setUsername] = useState("");
     const [referrer, setReferrer] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // ✅ referral validation states
+    const [refCheckLoading, setRefCheckLoading] = useState(false);
+    const [isRefValid, setIsRefValid] = useState(true);
+    const [refError, setRefError] = useState("");
+
+    const REGISTRATION_FEE_USD = 15;
 
     // -----------------------------
     // COPY REFERRAL CODE
@@ -44,7 +55,56 @@ export default function Register() {
     };
 
     // -----------------------------
-    // Register Backend
+    // LIVE REFERRER VALIDATION
+    // -----------------------------
+    useEffect(() => {
+        if (!referrer.trim()) {
+            setIsRefValid(true);
+            setRefError("");
+            return;
+        }
+
+        if (!ethers.isAddress(referrer.trim())) {
+            setIsRefValid(false);
+            setRefError("Invalid wallet format");
+            return;
+        }
+
+        if (address && referrer.trim().toLowerCase() === address.toLowerCase()) {
+            setIsRefValid(false);
+            setRefError("You cannot refer yourself");
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            try {
+                setRefCheckLoading(true);
+                setRefError("");
+
+                const res = await axios.get(
+                    `${API_BASE}/users/validate-referrer/${referrer.trim()}`
+                );
+
+                if (res.data?.data?.valid) {
+                    setIsRefValid(true);
+                    setRefError("");
+                } else {
+                    setIsRefValid(false);
+                    setRefError("Referral code not found");
+                }
+            } catch (err) {
+                setIsRefValid(false);
+                setRefError(err.response?.data?.message || "Referral check failed");
+            } finally {
+                setRefCheckLoading(false);
+            }
+        }, 700);
+
+        return () => clearTimeout(timer);
+    }, [referrer, address]);
+
+    // -----------------------------
+    // Register (Contract + Backend)
     // -----------------------------
     const handleRegisterSubmit = async () => {
         try {
@@ -58,26 +118,51 @@ export default function Register() {
                 return;
             }
 
+            if (!bnbPrice) {
+                toast.error("⚠ BNB price not loaded yet");
+                return;
+            }
+
+            if (!isRefValid) {
+                toast.error("❌ Invalid referral code");
+                return;
+            }
+
             setLoading(true);
 
+            const bnbAmount = REGISTRATION_FEE_USD / Number(bnbPrice);
+            const amountWei = ethers.parseEther(bnbAmount.toFixed(18));
+
+            const referrerWallet = referrer.trim()
+                ? referrer.trim()
+                : "0x0000000000000000000000000000000000000000";
+
+            // 1️⃣ Contract tx
+            const txRes = await registerUserOnChain(referrerWallet, amountWei);
+
+            if (!txRes.success) {
+                setLoading(false);
+                return;
+            }
+
+            // 2️⃣ Save into DB after tx success
             const payload = {
                 walletAddress: address,
                 username: username.trim(),
                 referredByAddress: referrer.trim() ? referrer.trim() : null,
+                txHash: txRes.hash,
             };
 
             const res = await axios.post(`${API_BASE}/users/register`, payload);
 
-            // ✅ backend returns token
+            // 3️⃣ Save token
             const jwtToken = res.data?.data?.token;
 
             if (jwtToken) {
-                // ✅ update auth state + localStorage
                 setAuthToken(jwtToken);
-
-                toast.success("✅ Registered & Logged In Successfully");
+                toast.success("✅ Registered Successfully!");
             } else {
-                toast.success(res.data.message || "✅ User registered successfully!");
+                toast.success(res.data.message || "✅ Registered successfully!");
             }
 
             setOpen(false);
@@ -95,8 +180,8 @@ export default function Register() {
     return (
         <section className="py-28">
             {/* =====================================================
-                ✅ IF TOKEN EXISTS → SHOW REFERRAL UI
-            ====================================================== */}
+          ✅ IF TOKEN EXISTS → SHOW REFERRAL UI
+      ====================================================== */}
             {token ? (
                 <div className="max-w-5xl mx-auto px-6">
                     <motion.div
@@ -137,7 +222,7 @@ export default function Register() {
                 </div>
             ) : (
                 /* =====================================================
-                    ❌ IF NO TOKEN → SHOW REGISTER FORM
+                      ❌ IF NO TOKEN → SHOW REGISTER FORM
                 ====================================================== */
                 <div className="max-w-6xl mx-auto px-6">
                     <motion.div
@@ -169,16 +254,36 @@ export default function Register() {
                                         placeholder="0x... (leave empty for default referrer)"
                                     />
 
-                                    <p className="mt-2 text-xs text-gray-500">
-                                        If no referral is provided, system will assign default referrer.
-                                    </p>
+                                    {/* validation message */}
+                                    {referrer.trim() ? (
+                                        <p className="mt-2 text-xs">
+                                            {refCheckLoading ? (
+                                                <span className="text-gray-400">Checking referral...</span>
+                                            ) : isRefValid ? (
+                                                <span className="text-green-400">✅ Valid referral</span>
+                                            ) : (
+                                                <span className="text-red-400">❌ {refError}</span>
+                                            )}
+                                        </p>
+                                    ) : (
+                                        <p className="mt-2 text-xs text-gray-500">
+                                            If no referral is provided, system will assign default referrer.
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Fee Section */}
                                 <div className="mt-12 flex justify-between items-center border-t border-white/10 pt-8">
                                     <div>
                                         <p className="text-gray-400 font-medium">Registration Fee</p>
-                                        <p className="text-gray-500 text-sm mt-1">≈ 0.0232 BNB</p>
+
+                                        <p className="text-gray-500 text-sm mt-1">
+                                            ≈{" "}
+                                            {loadingPrice || !bnbPrice
+                                                ? "Loading..."
+                                                : (REGISTRATION_FEE_USD / Number(bnbPrice)).toFixed(6)}{" "}
+                                            BNB
+                                        </p>
                                     </div>
 
                                     <p className="text-yellow-400 font-extrabold text-4xl glow-text">
@@ -225,9 +330,13 @@ export default function Register() {
                                                                 size="lg"
                                                                 className="w-full flex gap-2"
                                                                 onClick={() => setOpen(true)}
-                                                                disabled={authLoading}
+                                                                disabled={authLoading || refCheckLoading || !isRefValid}
                                                             >
-                                                                {authLoading ? "Signing..." : "Register Now"}
+                                                                {authLoading
+                                                                    ? "Signing..."
+                                                                    : refCheckLoading
+                                                                        ? "Checking referral..."
+                                                                        : "Register Now"}
                                                             </Button>
 
                                                             <Button
@@ -257,6 +366,7 @@ export default function Register() {
             )}
 
             {/* ---------------- MODAL ---------------- */}
+            {/* ✅ YOUR ORIGINAL MODAL UI (UNCHANGED) */}
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="bg-black/95 border border-white/10 text-white rounded-2xl shadow-2xl max-w-lg">
                     <DialogHeader>
@@ -271,9 +381,7 @@ export default function Register() {
 
                     {/* Username Input */}
                     <div className="mt-6">
-                        <label className="text-gray-300 text-sm font-medium">
-                            Username
-                        </label>
+                        <label className="text-gray-300 text-sm font-medium">Username</label>
 
                         <div className="flex items-center gap-3 mt-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
                             <User className="text-yellow-400" size={18} />
@@ -320,11 +428,15 @@ export default function Register() {
                         <Button
                             className="w-full"
                             onClick={handleRegisterSubmit}
-                            disabled={loading}
+                            disabled={loading || loadingPrice || !bnbPrice || !isRefValid}
                         >
-                            {loading ? "Registering..." : "Confirm & Register"}
+                            {loading ? "Processing..." : "Confirm & Register"}
                         </Button>
                     </div>
+
+                    <p className="text-center text-xs text-gray-500 mt-4">
+                        Transaction must confirm before registration is saved.
+                    </p>
                 </DialogContent>
             </Dialog>
         </section>

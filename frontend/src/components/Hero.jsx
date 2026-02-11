@@ -3,9 +3,12 @@ import { Button } from "./ui/button";
 import logo from "../assets/logo.png";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAuth } from "../context/AuthProvider";
+import useBnbPrice from "../hooks/useBnbPrice";
 
 export default function Hero() {
-    const { token, authLoading } = useAuth();
+    const { authLoading } = useAuth();
+
+    const { bnbPrice, loadingPrice } = useBnbPrice();
 
     return (
         <section className="pt-36 pb-24 relative overflow-hidden">
@@ -19,7 +22,10 @@ export default function Hero() {
             >
                 <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-6 py-2 rounded-full text-gray-300">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Live BNB Price: $646.32
+                    Live BNB Price:{" "}
+                    <span className="text-yellow-400 font-bold">
+                        {loadingPrice ? "Loading..." : bnbPrice ? `$${bnbPrice}` : "N/A"}
+                    </span>
                 </div>
 
                 <motion.div
@@ -61,7 +67,6 @@ export default function Hero() {
                     transition={{ delay: 0.8, duration: 0.8 }}
                     className="mt-10 flex justify-center gap-6 flex-wrap"
                 >
-                    {/* Wallet Button */}
                     <ConnectButton.Custom>
                         {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
                             const ready = mounted;
@@ -84,10 +89,7 @@ export default function Hero() {
                                         </Button>
                                     ) : (
                                         <Button size="lg" onClick={openAccountModal} disabled={authLoading}>
-                                            {authLoading
-                                                ? "Signing..."
-                                                : "Connected"
-                                            }
+                                            {authLoading ? "Signing..." : "Connected"}
                                         </Button>
                                     )}
                                 </div>

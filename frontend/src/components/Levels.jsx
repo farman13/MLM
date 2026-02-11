@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "./ui/card";
 import { Lock, Crown } from "lucide-react";
 import { Button } from "./ui/button";
+import useBnbPrice from "../hooks/useBnbPrice";
 
 export default function Levels() {
+    const { bnbPrice, loadingPrice } = useBnbPrice();
+
     const levels = [
         { level: 0, cost: 15, earn: null },
         { level: 1, cost: 20, earn: 10 },
@@ -17,6 +20,12 @@ export default function Levels() {
         { level: 9, cost: 6400, earn: 1632000 },
         { level: 10, cost: 12800, earn: 6540800 },
     ];
+
+    // Convert USD to BNB
+    const usdToBnb = (usd) => {
+        if (!bnbPrice) return null;
+        return (usd / bnbPrice).toFixed(4);
+    };
 
     return (
         <section id="levels" className="py-28 relative overflow-hidden">
@@ -40,74 +49,81 @@ export default function Levels() {
                     transition={{ duration: 0.7, delay: 0.2 }}
                     className="text-center text-gray-400 mt-4 max-w-3xl mx-auto"
                 >
-                    Upgrade through all 10 levels. Each upgrade pays rewards instantly on
-                    chain.
+                    Upgrade through all 10 levels. Each upgrade pays rewards instantly on chain.
                 </motion.p>
 
                 <div className="mt-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-7">
-                    {levels.map((item, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 60 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: index * 0.05 }}
-                        >
-                            <Card
-                                className={`hover:scale-[1.03] transition-all ${item.level === 14
-                                    ? "border-yellow-400/40 shadow-yellow-400/20"
-                                    : "border-white/10"
-                                    }`}
+                    {levels.map((item, index) => {
+                        const bnbValue = usdToBnb(item.cost);
+
+                        return (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 60 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6, delay: index * 0.05 }}
                             >
-                                <CardContent className="p-7">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="text-xl font-bold">
-                                            Level{" "}
-                                            <span className="text-yellow-400">{item.level}</span>
-                                        </h3>
+                                <Card className="hover:scale-[1.03] transition-all border-white/10">
+                                    <CardContent className="p-7">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-xl font-bold">
+                                                Level{" "}
+                                                <span className="text-yellow-400">{item.level}</span>
+                                            </h3>
 
-                                        {item.level === 14 ? (
-                                            <Crown className="text-yellow-400" size={22} />
-                                        ) : (
-                                            <Lock className="text-gray-500" size={20} />
-                                        )}
-                                    </div>
+                                            {item.level === 14 ? (
+                                                <Crown className="text-yellow-400" size={22} />
+                                            ) : (
+                                                <Lock className="text-gray-500" size={20} />
+                                            )}
+                                        </div>
 
-                                    {(item.level === 1 || item.level === 5) && (
-                                        <p className="text-gray-500 mt-2 text-sm">
-                                            👥 {item.level === 1 ? 2 : 5} new referrals to complete
-                                        </p>
-                                    )}
-
-                                    <div className="mt-6">
-                                        <p className="text-gray-400 text-sm">Level Cost</p>
-                                        <p className="text-yellow-400 text-3xl font-extrabold glow-text">
-                                            ${item.cost.toLocaleString()}
-                                        </p>
-                                        <p className="text-gray-500 text-sm">≈ ... BNB</p>
-                                    </div>
-
-                                    {item.earn && (
-                                        <div className="mt-6 bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
-                                            <p className="text-green-400 font-semibold text-sm">
-                                                → Upgrade earns ${item.earn.toLocaleString()}
+                                        {(item.level === 1 || item.level === 5) && (
+                                            <p className="text-gray-500 mt-2 text-sm">
+                                                👥 {item.level === 1 ? 2 : 5} new referrals to complete
                                             </p>
-                                            <p className="text-gray-500 text-xs mt-2">
-                                                Paid instantly · 10% fee taken on-chain
+                                        )}
+
+                                        <div className="mt-6">
+                                            <p className="text-gray-400 text-sm">Level Cost</p>
+
+                                            <p className="text-yellow-400 text-3xl font-extrabold glow-text">
+                                                ${item.cost.toLocaleString()}
+                                            </p>
+
+                                            <p className="text-gray-500 text-sm">
+                                                ≈{" "}
+                                                {loadingPrice
+                                                    ? "Loading..."
+                                                    : bnbValue
+                                                        ? `${bnbValue} BNB`
+                                                        : "N/A"}
                                             </p>
                                         </div>
-                                    )}
 
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full mt-6 bg-white/5 hover:bg-white/10 text-gray-500 cursor-not-allowed"
-                                    >
-                                        Locked
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    ))}
+                                        {item.earn && (
+                                            <div className="mt-6 bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
+                                                <p className="text-green-400 font-semibold text-sm">
+                                                    → Upgrade earns ${item.earn.toLocaleString()}
+                                                </p>
+                                                <p className="text-gray-500 text-xs mt-2">
+                                                    Paid instantly · 10% fee taken on-chain
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full mt-6 bg-white/5 hover:bg-white/10 text-gray-500 cursor-not-allowed"
+                                        >
+                                            Locked
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
         </section>
