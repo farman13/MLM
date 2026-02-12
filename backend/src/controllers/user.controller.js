@@ -254,7 +254,7 @@ export const getMe = AsyncHandler(async (req, res) => {
     }
 
     // ✅ attach chain info also
-    const chainInfo = await fetchUserInfoFromChain(user.walletAddress);
+    const chainInfo = await getUserInfoFromChain(user.walletAddress);
 
     return res.status(200).json(
         new ApiResponse(
