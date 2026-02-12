@@ -9,7 +9,7 @@ export const getBNBPrice = AsyncHandler(async (req, res) => {
     const now = Date.now();
 
     // cache for 10 seconds
-    if (cachedPrice && now - lastFetchTime < 10000) {
+    if (cachedPrice && now - lastFetchTime < 60000) {
         return res
             .status(200)
             .json(new ApiResponse(200, cachedPrice, "BNB price fetched (cached)"));

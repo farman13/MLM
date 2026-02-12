@@ -1,11 +1,14 @@
+import { getUserInfoFromChain } from "../listeners/mlm.listner.js";
 import { User } from "../models/user.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import AsyncHandler from "../utils/AsyncHandler.js";
 import { createToken } from "./auth.controller.js";
-// -----------------------------
+import axios from "axios";
+
+// ==========================================
 // Register User
-// -----------------------------
+// ==========================================
 export const registerUser = AsyncHandler(async (req, res) => {
     const { walletAddress, username, referredByAddress } = req.body;
 
@@ -30,6 +33,15 @@ export const registerUser = AsyncHandler(async (req, res) => {
         ? referredByAddress.toLowerCase()
         : null;
 
+    // ✅ if referrer exists, it must be a registered user
+    if (referrerWallet) {
+        const refExists = await User.findOne({ walletAddress: referrerWallet });
+
+        if (!refExists) {
+            throw new ApiError(400, "Invalid referral code");
+        }
+    }
+
     const newUser = await User.create({
         walletAddress: wallet,
         username: uname,
@@ -37,7 +49,6 @@ export const registerUser = AsyncHandler(async (req, res) => {
         directReferrals: [],
         directReferralCount: 0,
         totalTeamSize: 0,
-        level: 1,
         isRegistered: true,
     });
 
@@ -55,9 +66,8 @@ export const registerUser = AsyncHandler(async (req, res) => {
         }
     }
 
-    // ✅ create jwt after registration
-    const isAdmin =
-        wallet === process.env.ADMIN_WALLET?.toLowerCase();
+    // create jwt after registration
+    const isAdmin = wallet === process.env.ADMIN_WALLET?.toLowerCase();
 
     const token = createToken({
         walletAddress: wallet,
@@ -78,10 +88,9 @@ export const registerUser = AsyncHandler(async (req, res) => {
     );
 });
 
-
-// -----------------------------
+// ==========================================
 // Get User By Username
-// -----------------------------
+// ==========================================
 export const getUserByUsername = AsyncHandler(async (req, res) => {
     const { username } = req.params;
 
@@ -100,9 +109,9 @@ export const getUserByUsername = AsyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "User fetched successfully"));
 });
 
-// -----------------------------
+// ==========================================
 // Get User By Wallet Address
-// -----------------------------
+// ==========================================
 export const getUserByWallet = AsyncHandler(async (req, res) => {
     const { wallet } = req.params;
 
@@ -121,9 +130,9 @@ export const getUserByWallet = AsyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "User fetched successfully"));
 });
 
-// -----------------------------
+// ==========================================
 // Update Username
-// -----------------------------
+// ==========================================
 export const updateUsername = AsyncHandler(async (req, res) => {
     const { wallet } = req.params;
     const { username } = req.body;
@@ -158,9 +167,9 @@ export const updateUsername = AsyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "Username updated successfully"));
 });
 
-// -----------------------------
+// ==========================================
 // Get All Users
-// -----------------------------
+// ==========================================
 export const getAllUsers = AsyncHandler(async (req, res) => {
     const users = await User.find().sort({ createdAt: -1 });
 
@@ -169,15 +178,21 @@ export const getAllUsers = AsyncHandler(async (req, res) => {
         .json(new ApiResponse(200, users, "Users fetched successfully"));
 });
 
-// -----------------------------
-// Build Referral Tree Recursively
-// -----------------------------
+
+
+// ==========================================
+// Build Referral Tree Recursively (DB Tree + Chain Enrichment)
+// ==========================================
 const buildTree = async (walletAddress, depth = 0, maxDepth = 10) => {
     if (depth >= maxDepth) return null;
 
     const user = await User.findOne({ walletAddress });
 
     if (!user) return null;
+
+    // ✅ Fetch smart contract info
+    const chainInfo = await getUserInfoFromChain(user.walletAddress);
+    console.log(`Building tree for ${user.username} at depth ${depth} with chain info:`, chainInfo);
 
     const children = [];
 
@@ -189,15 +204,23 @@ const buildTree = async (walletAddress, depth = 0, maxDepth = 10) => {
     return {
         username: user.username,
         walletAddress: user.walletAddress,
-        level: user.level,
-        directReferralCount: user.directReferralCount,
+
+        // ✅ level & directReferrals from chain (REAL)
+        level: chainInfo ? Number(chainInfo.level) : 0,
+        directReferralCount: chainInfo
+            ? Number(chainInfo.directReferrals)
+            : user.directReferralCount,
+
+        teamSize: chainInfo ? Number(chainInfo.teamSize) : user.totalTeamSize,
+        registered: chainInfo ? chainInfo.registered : user.isRegistered,
+
         referrals: children,
     };
 };
 
-// -----------------------------
+// ==========================================
 // Get Referral Tree by Username
-// -----------------------------
+// ==========================================
 export const getReferralTreeByUsername = AsyncHandler(async (req, res) => {
     const { username } = req.params;
 
@@ -218,9 +241,9 @@ export const getReferralTreeByUsername = AsyncHandler(async (req, res) => {
         .json(new ApiResponse(200, tree, "Referral tree fetched successfully"));
 });
 
-// -----------------------------
+// ==========================================
 // Get Logged-in User Profile (ME)
-// -----------------------------
+// ==========================================
 export const getMe = AsyncHandler(async (req, res) => {
     const wallet = req.user.walletAddress;
 
@@ -230,14 +253,24 @@ export const getMe = AsyncHandler(async (req, res) => {
         throw new ApiError(404, "User not found");
     }
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "User profile fetched successfully"));
+    // ✅ attach chain info also
+    const chainInfo = await fetchUserInfoFromChain(user.walletAddress);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                ...user.toObject(),
+                chainInfo,
+            },
+            "User profile fetched successfully"
+        )
+    );
 });
 
-// -----------------------------
+// ==========================================
 // Get Logged-in User Referral Tree (ME)
-// -----------------------------
+// ==========================================
 export const getMyReferralTree = AsyncHandler(async (req, res) => {
     const wallet = req.user.walletAddress;
 
@@ -254,9 +287,9 @@ export const getMyReferralTree = AsyncHandler(async (req, res) => {
         .json(new ApiResponse(200, tree, "My referral tree fetched successfully"));
 });
 
-// -----------------------------
+// ==========================================
 // Validate Referrer Wallet
-// -----------------------------
+// ==========================================
 export const validateReferrer = AsyncHandler(async (req, res) => {
     const { wallet } = req.params;
 
