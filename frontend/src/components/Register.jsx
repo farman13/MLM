@@ -9,7 +9,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthProvider";
 import { useMLMWeb3 } from "../context/MLMWeb3Provider";
-import useBnbPrice from "../hooks/useBnbPrice";
 import { ethers } from "ethers";
 
 import {
@@ -21,13 +20,14 @@ import {
 } from "./ui/dialog";
 
 import { API_BASE } from "../lib/utils";
+import useUserInfo from "../hooks/useUserInfo";
 
-export default function Register() {
+export default function Register({ bnbPrice, loadingPrice }) {
     const { address, isConnected } = useAccount();
 
     const { token, authLoading, setAuthToken } = useAuth();
     const { registerUserOnChain } = useMLMWeb3();
-    const { bnbPrice, loadingPrice } = useBnbPrice();
+    const { refetchUserInfo } = useUserInfo(address);
 
     const [open, setOpen] = useState(false);
     const [username, setUsername] = useState("");
@@ -39,7 +39,7 @@ export default function Register() {
     const [isRefValid, setIsRefValid] = useState(true);
     const [refError, setRefError] = useState("");
 
-    const REGISTRATION_FEE_USD = 15;
+    const REGISTRATION_FEE_USD = 0.15;
 
     // -----------------------------
     // COPY REFERRAL CODE
@@ -165,6 +165,7 @@ export default function Register() {
                 toast.success(res.data.message || "✅ Registered successfully!");
             }
 
+            await refetchUserInfo();
             setOpen(false);
             setUsername("");
             setReferrer("");

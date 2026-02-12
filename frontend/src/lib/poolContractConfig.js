@@ -1,4 +1,4 @@
-export const poolContractAddress = "0x6A25cCd846bFDA791d699434348DCcD56e180D63";
+export const poolContractAddress = "0x6e57e978b0a3dC1645c4B37d0C3EEed09714bC5A";
 
 export const poolABI = [
     {
@@ -182,6 +182,19 @@ export const poolABI = [
     },
     {
         "inputs": [],
+        "name": "count",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "entryFee",
         "outputs": [
             {
@@ -227,6 +240,19 @@ export const poolABI = [
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "poolLength",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint256",
@@ -240,19 +266,6 @@ export const poolABI = [
                 "internalType": "address",
                 "name": "",
                 "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "queueLength",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
             }
         ],
         "stateMutability": "view",

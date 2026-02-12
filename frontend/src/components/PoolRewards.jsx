@@ -9,10 +9,10 @@ import { formatEther } from "viem";
 import { usePoolWeb3 } from "../context/PoolWeb3Provider";
 
 export default function PoolRewards() {
-    const { address, joinPool, withdrawPoolRewards, getPoolQueue, getEntryFee, getUserPoolBalance } =
+    const { address, joinPool, withdrawPoolRewards, getPoolLength, getEntryFee, getUserPoolBalance } =
         usePoolWeb3();
 
-    const [queue, setQueue] = useState([]);
+    const [users, setUsers] = useState(0);
     const [entryFee, setEntryFee] = useState(0n);
     const [userBalance, setUserBalance] = useState(0n);
     const [loading, setLoading] = useState(false);
@@ -20,10 +20,10 @@ export default function PoolRewards() {
     const maxUsers = 5;
 
     const loadPoolData = async () => {
-        const q = await getPoolQueue();
+        const user = await getPoolLength();
         const fee = await getEntryFee();
 
-        setQueue(q);
+        setUsers(user);
         setEntryFee(fee);
 
         if (address) {
@@ -50,7 +50,7 @@ export default function PoolRewards() {
         loadPoolData();
     }, [address]);
 
-    const currentUsers = queue.length;
+    const currentUsers = users;
 
     return (
         <section id="pool" className="py-28">

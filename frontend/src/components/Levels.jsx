@@ -2,10 +2,15 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "./ui/card";
 import { Lock, Crown } from "lucide-react";
 import { Button } from "./ui/button";
-import useBnbPrice from "../hooks/useBnbPrice";
+import { useAccount } from "wagmi";
+import useUserInfo from "../hooks/useUserInfo";
 
-export default function Levels() {
-    const { bnbPrice, loadingPrice } = useBnbPrice();
+export default function Levels({ bnbPrice, loadingPrice }) {
+    const { address } = useAccount();
+
+    const { userInfo, loadingUserInfo } = useUserInfo(address);
+
+    const userLevel = userInfo?.level ?? -1;
 
     const levels = [
         { level: 0, cost: 15, earn: null },
@@ -21,7 +26,6 @@ export default function Levels() {
         { level: 10, cost: 12800, earn: 6540800 },
     ];
 
-    // Convert USD to BNB
     const usdToBnb = (usd) => {
         if (!bnbPrice) return null;
         return (usd / bnbPrice).toFixed(4);
@@ -49,12 +53,29 @@ export default function Levels() {
                     transition={{ duration: 0.7, delay: 0.2 }}
                     className="text-center text-gray-400 mt-4 max-w-3xl mx-auto"
                 >
-                    Upgrade through all 10 levels. Each upgrade pays rewards instantly on chain.
+                    Upgrade through all 10 levels. Each upgrade pays rewards instantly on
+                    chain.
                 </motion.p>
+
+                {/* show user level */}
+                <div className="mt-6 text-center text-gray-400">
+                    {loadingUserInfo ? (
+                        "Checking your level..."
+                    ) : userInfo?.registered ? (
+                        <>
+                            Your Current Level:{" "}
+                            <span className="text-yellow-400 font-bold">{userLevel}</span>
+                        </>
+                    ) : (
+                        "Register first to unlock levels."
+                    )}
+                </div>
 
                 <div className="mt-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-7">
                     {levels.map((item, index) => {
                         const bnbValue = usdToBnb(item.cost);
+
+                        const unlocked = userInfo?.registered && item.level <= userLevel;
 
                         return (
                             <motion.div
@@ -64,7 +85,10 @@ export default function Levels() {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6, delay: index * 0.05 }}
                             >
-                                <Card className="hover:scale-[1.03] transition-all border-white/10">
+                                <Card
+                                    className={`hover:scale-[1.03] transition-all border-white/10 ${unlocked ? "border-yellow-400/40 shadow-yellow-400/10" : ""
+                                        }`}
+                                >
                                     <CardContent className="p-7">
                                         <div className="flex justify-between items-center">
                                             <h3 className="text-xl font-bold">
@@ -72,13 +96,14 @@ export default function Levels() {
                                                 <span className="text-yellow-400">{item.level}</span>
                                             </h3>
 
-                                            {item.level === 14 ? (
+                                            {unlocked ? (
                                                 <Crown className="text-yellow-400" size={22} />
                                             ) : (
                                                 <Lock className="text-gray-500" size={20} />
                                             )}
                                         </div>
 
+                                        {/* ✅ referrals required message back */}
                                         {(item.level === 1 || item.level === 5) && (
                                             <p className="text-gray-500 mt-2 text-sm">
                                                 👥 {item.level === 1 ? 2 : 5} new referrals to complete
@@ -115,9 +140,13 @@ export default function Levels() {
 
                                         <Button
                                             variant="ghost"
-                                            className="w-full mt-6 bg-white/5 hover:bg-white/10 text-gray-500 cursor-not-allowed"
+                                            className={`w-full mt-6 ${unlocked
+                                                    ? "bg-yellow-400 text-black hover:bg-yellow-300"
+                                                    : "bg-white/5 hover:bg-white/10 text-gray-500 cursor-not-allowed"
+                                                }`}
+                                            disabled={!unlocked}
                                         >
-                                            Locked
+                                            {unlocked ? "Unlocked" : "Locked"}
                                         </Button>
                                     </CardContent>
                                 </Card>

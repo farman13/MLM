@@ -76,17 +76,17 @@ export function PoolWeb3Provider({ children }) {
     // ------------------------
     // Read Pool Queue
     // ------------------------
-    const getPoolQueue = async () => {
+    const getPoolLength = async () => {
         try {
             return await publicClient.readContract({
                 address: poolContractAddress,
                 abi: poolABI,
-                functionName: "getQueue",
+                functionName: "poolLength",
                 args: [],
             });
         } catch (err) {
-            console.log("getPoolQueue error:", err);
-            return [];
+            console.log("getPoolLength error:", err);
+            return 0;
         }
     };
 
@@ -129,7 +129,7 @@ export function PoolWeb3Provider({ children }) {
                 isConnected,
                 joinPool,
                 withdrawPoolRewards,
-                getPoolQueue,
+                getPoolLength,
                 getEntryFee,
                 getUserPoolBalance,
             }}

@@ -3,12 +3,9 @@ import { Button } from "./ui/button";
 import logo from "../assets/logo.png";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAuth } from "../context/AuthProvider";
-import useBnbPrice from "../hooks/useBnbPrice";
 
-export default function Hero() {
+export default function Hero({ bnbPrice, loadingPrice }) {
     const { authLoading } = useAuth();
-
-    const { bnbPrice, loadingPrice } = useBnbPrice();
 
     return (
         <section className="pt-36 pb-24 relative overflow-hidden">

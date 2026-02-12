@@ -24,11 +24,11 @@ export function MLMWeb3Provider({ children }) {
             }
 
             toast.info("⏳ Confirm transaction in wallet...");
-
+            console.log("Registering with referrer:", referrerAddress, "Amount (wei):", amountWei);
             const hash = await writeContractAsync({
                 address: mlmContractAddress,
                 abi: mlmABI,
-                functionName: "registerUser",
+                functionName: "register",
                 args: [referrerAddress],
                 value: amountWei, // payable
             });

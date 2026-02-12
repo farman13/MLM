@@ -9,18 +9,21 @@ import Levels from "../components/Levels";
 import PoolRewards from "../components/PoolRewards";
 import ReferralTree from "../components/ReferralTree";
 import Footer from "../components/Footer";
+import useBnbPrice from "../hooks/useBnbPrice";
 
 export default function Home() {
+
+    const { bnbPrice, loadingPrice } = useBnbPrice();
     return (
         <div className="min-h-screen bg-[#070a0f] text-white grid-bg">
             <ToastContainer position="top-right" autoClose={2500} />
             <Navbar />
-            <Hero />
+            <Hero bnbPrice={bnbPrice} loadingPrice={loadingPrice} />
             <Features />
             <HowItWorks />
             {/* <Matrix /> */}
-            <Register />
-            <Levels />
+            <Register bnbPrice={bnbPrice} loadingPrice={loadingPrice} />
+            <Levels bnbPrice={bnbPrice} loadingPrice={loadingPrice} />
             <PoolRewards />
             <ReferralTree />
             <Footer />

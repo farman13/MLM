@@ -41,7 +41,10 @@ function DesktopTreeNode({ node }) {
 
                 <p className="text-gray-400 text-sm mt-1 break-all">
                     Wallet:{" "}
-                    <span className="text-gray-300 font-medium">{node.walletAddress.substring(0, 6)}...{node.walletAddress.substring(node.walletAddress.length - 4)}</span>
+                    <span className="text-gray-300 font-medium">
+                        {node.walletAddress.substring(0, 6)}...
+                        {node.walletAddress.substring(node.walletAddress.length - 4)}
+                    </span>
                 </p>
 
                 <p className="text-gray-500 text-sm mt-1">
@@ -83,7 +86,6 @@ export default function ReferralTree() {
     const getUsernameFromToken = () => {
         try {
             if (!token) return null;
-
             const payload = JSON.parse(atob(token.split(".")[1]));
             return payload.username || null;
         } catch (err) {
@@ -91,6 +93,9 @@ export default function ReferralTree() {
         }
     };
 
+    // -----------------------------
+    // Fetch Tree (Backend already enriches from contract)
+    // -----------------------------
     const fetchTree = async () => {
         try {
             const username = getUsernameFromToken();
@@ -109,7 +114,8 @@ export default function ReferralTree() {
                 },
             });
 
-            setTree(res.data.data);
+            setTree(res.data?.data || null);
+            console.log("Referral Tree:", res.data?.data);
         } catch (err) {
             setTree(null);
             setError(err.response?.data?.message || "Failed to fetch referral tree");
@@ -119,9 +125,7 @@ export default function ReferralTree() {
     };
 
     useEffect(() => {
-        if (token) {
-            fetchTree();
-        }
+        if (token) fetchTree();
     }, [token]);
 
     // ✅ only show if token exists

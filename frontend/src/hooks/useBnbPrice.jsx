@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_BASE } from "../lib/utils";
 
-export default function useBnbPrice(refreshInterval = 30000) {
+export default function useBnbPrice(refreshInterval = 60000) {
     const [bnbPrice, setBnbPrice] = useState(null);
     const [loadingPrice, setLoadingPrice] = useState(false);
     const [error, setError] = useState("");
