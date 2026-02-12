@@ -141,8 +141,8 @@ export default function Levels({ bnbPrice, loadingPrice }) {
                                         <Button
                                             variant="ghost"
                                             className={`w-full mt-6 ${unlocked
-                                                    ? "bg-yellow-400 text-black hover:bg-yellow-300"
-                                                    : "bg-white/5 hover:bg-white/10 text-gray-500 cursor-not-allowed"
+                                                ? "bg-yellow-400 text-black hover:bg-yellow-300"
+                                                : "bg-white/5 hover:bg-white/10 text-gray-500 cursor-not-allowed"
                                                 }`}
                                             disabled={!unlocked}
                                         >
