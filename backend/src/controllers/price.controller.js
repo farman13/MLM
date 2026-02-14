@@ -16,12 +16,11 @@ export const getBNBPrice = AsyncHandler(async (req, res) => {
     }
 
     const url =
-        "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd";
+        "https://min-api.cryptocompare.com/data/price?fsym=BNB&tsyms=USD";
 
     const response = await axios.get(url);
 
-    const price = response.data.binancecoin.usd;
-
+    const price = response.data.USD;
     cachedPrice = { price };
     lastFetchTime = now;
 

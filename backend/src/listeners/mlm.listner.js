@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 import { mlmAbi } from "../utils/mlmContractConfig.js";
 
-// const CONTRACT_ADDRESS = process.env.MLM_CONTRACT_ADDRESS;
-const MLM_CONTRACT_ADDRESS = "0x49093315B4012454ED3Ae465eB02060aFcE2f1AA";
+const CONTRACT_ADDRESS = process.env.MLM_CONTRACT_ADDRESS;
+// const MLM_CONTRACT_ADDRESS = "0x40e7d0815f6ACaD9954064d34b7aCe3e491D2845";
 
 
 export const getUserInfoFromChain = async (wallet) => {
@@ -10,7 +10,7 @@ export const getUserInfoFromChain = async (wallet) => {
     const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 
     const contract = new ethers.Contract(
-        MLM_CONTRACT_ADDRESS,
+        CONTRACT_ADDRESS,
         mlmAbi,
         provider
     );
