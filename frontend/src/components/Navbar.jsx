@@ -6,10 +6,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useMLMWeb3 } from "../context/MLMWeb3Provider";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
     const { token, authLoading } = useAuth();
+    const { withdrawMLMUserBalance } = useMLMWeb3();
 
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -33,6 +35,13 @@ export default function Navbar() {
         }
     }, [token]);
 
+    // -----------------------------
+    // Withdraw MLM Balance
+    // -----------------------------
+    const handleWithdrawMLM = async () => {
+        await withdrawMLMUserBalance();
+    };
+
     return (
         <motion.nav
             initial={{ y: -50, opacity: 0 }}
@@ -53,7 +62,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Desktop Links */}
-                <div className="hidden md:flex gap-10 text-gray-400 font-medium">
+                <div className="hidden md:flex gap-10 text-gray-400 font-medium items-center">
                     <a href="#features" className="hover:text-white transition">
                         Features
                     </a>
@@ -66,6 +75,14 @@ export default function Navbar() {
                     <a href="#pool" className="hover:text-white transition">
                         Pool
                     </a>
+
+                    {/* ✅ Withdraw Button */}
+                    <button
+                        onClick={handleWithdrawMLM}
+                        className="hover:text-white transition"
+                    >
+                        Withdraw
+                    </button>
 
                     {/* ✅ Admin Button */}
                     {isAdmin && (
@@ -162,6 +179,17 @@ export default function Navbar() {
                                 Pool
                             </a>
 
+                            {/* ✅ Withdraw Button Mobile */}
+                            <Button
+                                onClick={() => {
+                                    setOpen(false);
+                                    handleWithdrawMLM();
+                                }}
+                                className="hover:text-yellow-400 transition"
+                            >
+                                Withdraw MLM
+                            </Button>
+
                             {/* ✅ Admin Button Mobile */}
                             {isAdmin && (
                                 <Link to="/admin" onClick={() => setOpen(false)}>
@@ -188,12 +216,19 @@ export default function Navbar() {
                                             })}
                                         >
                                             {!connected ? (
-                                                <Button className="w-full flex gap-2" onClick={openConnectModal}>
+                                                <Button
+                                                    className="w-full flex gap-2"
+                                                    onClick={openConnectModal}
+                                                >
                                                     <Wallet size={20} />
                                                     Connect Wallet
                                                 </Button>
                                             ) : (
-                                                <Button className="w-full" onClick={openAccountModal} disabled={authLoading}>
+                                                <Button
+                                                    className="w-full"
+                                                    onClick={openAccountModal}
+                                                    disabled={authLoading}
+                                                >
                                                     {authLoading ? "Signing..." : "Connected"}
                                                 </Button>
                                             )}

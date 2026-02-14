@@ -1,5 +1,5 @@
 // export const mlmContractAddress = "0x30696cC7540cadA3bADf4976fFFf689955B5C23a";
-export const mlmContractAddress = "0x49093315B4012454ED3Ae465eB02060aFcE2f1AA";
+export const mlmContractAddress = "0x40e7d0815f6ACaD9954064d34b7aCe3e491D2845";
 
 
 export const mlmABI = [

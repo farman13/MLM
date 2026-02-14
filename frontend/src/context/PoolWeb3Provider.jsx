@@ -29,7 +29,7 @@ export function PoolWeb3Provider({ children }) {
                 abi: poolABI,
                 functionName: "joinPool",
                 args: [],
-                value: entryFeeWei, // IMPORTANT
+                value: entryFeeWei,
             });
 
             await publicClient.waitForTransactionReceipt({ hash });
@@ -53,7 +53,7 @@ export function PoolWeb3Provider({ children }) {
                 return { success: false };
             }
 
-            toast.info("⏳ Withdrawing reward...");
+            toast.info("⏳ Withdrawing pool reward...");
 
             const hash = await writeContractAsync({
                 address: poolContractAddress,
@@ -64,7 +64,7 @@ export function PoolWeb3Provider({ children }) {
 
             await publicClient.waitForTransactionReceipt({ hash });
 
-            toast.success("✅ Withdraw successful!");
+            toast.success("✅ Pool Withdraw successful!");
             return { success: true, hash };
         } catch (err) {
             const msg = err.shortMessage || err.message || "Withdraw failed";
@@ -74,7 +74,7 @@ export function PoolWeb3Provider({ children }) {
     };
 
     // ------------------------
-    // Read Pool Queue
+    // Read Pool Length
     // ------------------------
     const getPoolLength = async () => {
         try {
@@ -85,7 +85,6 @@ export function PoolWeb3Provider({ children }) {
                 args: [],
             });
         } catch (err) {
-            console.log("getPoolLength error:", err);
             return 0;
         }
     };
@@ -107,7 +106,7 @@ export function PoolWeb3Provider({ children }) {
     };
 
     // ------------------------
-    // Read User Balance
+    // Read User Pool Balance
     // ------------------------
     const getUserPoolBalance = async (userAddress) => {
         try {
@@ -116,6 +115,41 @@ export function PoolWeb3Provider({ children }) {
                 abi: poolABI,
                 functionName: "balances",
                 args: [userAddress],
+            });
+        } catch (err) {
+            return 0n;
+        }
+    };
+
+    // ------------------------
+    // Get Pool Owner
+    // ------------------------
+    const getPoolOwner = async () => {
+        try {
+            return await publicClient.readContract({
+                address: poolContractAddress,
+                abi: poolABI,
+                functionName: "owner",
+                args: [],
+            });
+        } catch (err) {
+            return null;
+        }
+    };
+
+    // ------------------------
+    // Get Admin Pool Balance
+    // ------------------------
+    const getAdminPoolBalance = async () => {
+        try {
+            const owner = await getPoolOwner();
+            if (!owner) return 0n;
+
+            return await publicClient.readContract({
+                address: poolContractAddress,
+                abi: poolABI,
+                functionName: "balances",
+                args: [owner],
             });
         } catch (err) {
             return 0n;
@@ -132,6 +166,7 @@ export function PoolWeb3Provider({ children }) {
                 getPoolLength,
                 getEntryFee,
                 getUserPoolBalance,
+                getAdminPoolBalance,
             }}
         >
             {children}

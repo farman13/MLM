@@ -8,12 +8,28 @@ import { Button } from "../components/ui/button";
 import { API_BASE } from "../lib/utils";
 import { Link } from "react-router-dom";
 
+import { usePoolWeb3 } from "../context/PoolWeb3Provider";
+import { useMLMWeb3 } from "../context/MLMWeb3Provider";
+import { formatEther } from "viem";
+
 export default function AdminDashboard() {
     const { token } = useAuth();
+
+    const { withdrawPoolRewards, getAdminPoolBalance } = usePoolWeb3();
+    const { withdrawMLMAdminBalance, getAdminMLMBalance } = useMLMWeb3();
 
     const [rounds, setRounds] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    const [poolAdminBalance, setPoolAdminBalance] = useState("0");
+    const [mlmAdminBalance, setMlmAdminBalance] = useState("0");
+
+    const [withdrawingPool, setWithdrawingPool] = useState(false);
+    const [withdrawingMLM, setWithdrawingMLM] = useState(false);
+
+    // -----------------------------
+    // Fetch Rounds from Backend
+    // -----------------------------
     const fetchRounds = async () => {
         try {
             setLoading(true);
@@ -32,24 +48,96 @@ export default function AdminDashboard() {
         }
     };
 
+    // -----------------------------
+    // Fetch Admin Balances from Contracts
+    // -----------------------------
+    const fetchAdminBalances = async () => {
+        try {
+            const poolBalWei = await getAdminPoolBalance();
+            const mlmBalWei = await getAdminMLMBalance();
+
+            setPoolAdminBalance(formatEther(poolBalWei));
+            setMlmAdminBalance(formatEther(mlmBalWei));
+        } catch (err) {
+            console.log("fetchAdminBalances error:", err);
+        }
+    };
+
+    // -----------------------------
+    // Withdraw Pool Contract Admin Balance
+    // -----------------------------
+    const handleWithdrawPool = async () => {
+        try {
+            setWithdrawingPool(true);
+
+            const res = await withdrawPoolRewards();
+
+            if (res.success) {
+                fetchAdminBalances();
+            }
+        } finally {
+            setWithdrawingPool(false);
+        }
+    };
+
+    // -----------------------------
+    // Withdraw MLM Contract Admin Balance
+    // -----------------------------
+    const handleWithdrawMLM = async () => {
+        try {
+            setWithdrawingMLM(true);
+
+            const res = await withdrawMLMAdminBalance();
+
+            if (res.success) {
+                fetchAdminBalances();
+            }
+        } finally {
+            setWithdrawingMLM(false);
+        }
+    };
+
     useEffect(() => {
-        if (token) fetchRounds();
+        if (token) {
+            fetchRounds();
+            fetchAdminBalances();
+        }
     }, [token]);
 
     return (
         <section className="pt-28 pb-20 min-h-screen bg-black text-white">
             <div className="max-w-7xl mx-auto px-6">
-
                 {/* NAVBAR */}
-                <div className="flex justify-between items-center mb-10 border-b border-white/10 pb-6">
-
-                    <div className="flex gap-4">
+                <div className="flex justify-between items-center mb-10 border-b border-white/10 pb-6 flex-wrap gap-4">
+                    <div className="flex gap-4 flex-wrap">
                         <Link to="/">
                             <Button variant="outline">← Back to Home</Button>
                         </Link>
 
                         <Button onClick={fetchRounds} disabled={loading}>
                             {loading ? "Refreshing..." : "Refresh"}
+                        </Button>
+
+                        <Button onClick={fetchAdminBalances} variant="outline">
+                            Refresh Balances
+                        </Button>
+                    </div>
+
+                    <div className="flex gap-3 flex-wrap">
+                        <Button
+                            className="bg-yellow-400 hover:bg-yellow-500 text-black"
+                            onClick={handleWithdrawPool}
+                            disabled={withdrawingPool}
+                        >
+                            {withdrawingPool ? "Withdrawing..." : "Withdraw Pool Amount"}
+                        </Button>
+
+                        <Button
+                            className="bg-yellow-400 hover:bg-yellow-500 text-black"
+                            onClick={handleWithdrawMLM}
+                            disabled={withdrawingMLM}
+                        >
+                            {withdrawingMLM ? "Withdrawing..." : "Withdraw MLM Amount"}
                         </Button>
                     </div>
                 </div>
@@ -64,8 +152,31 @@ export default function AdminDashboard() {
                     </h1>
 
                     <p className="text-gray-400 mt-3">
-                        View pool rounds history and winner details.
+                        View pool rounds history and withdraw admin balances.
                     </p>
+
+                    {/* BALANCE CARDS */}
+                    <div className="grid md:grid-cols-2 gap-6 mt-10">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                            <p className="text-gray-400 text-sm">
+                                Pool Contract Admin Balance
+                            </p>
+
+                            <p className="text-green-400 text-3xl font-bold mt-2">
+                                {poolAdminBalance} BNB
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                            <p className="text-gray-400 text-sm">
+                                MLM Contract Admin Balance
+                            </p>
+
+                            <p className="text-yellow-400 text-3xl font-bold mt-2">
+                                {mlmAdminBalance} BNB
+                            </p>
+                        </div>
+                    </div>
 
                     {/* ROUNDS TABLE */}
                     <div className="mt-10 overflow-x-auto border border-white/10 rounded-2xl">
@@ -85,7 +196,10 @@ export default function AdminDashboard() {
                             <tbody>
                                 {rounds.length === 0 && !loading && (
                                     <tr>
-                                        <td colSpan="7" className="text-center py-10 text-gray-500">
+                                        <td
+                                            colSpan="7"
+                                            className="text-center py-10 text-gray-500"
+                                        >
                                             No rounds found.
                                         </td>
                                     </tr>
@@ -129,7 +243,8 @@ export default function AdminDashboard() {
                                                     rel="noreferrer"
                                                     className="text-yellow-400 hover:underline"
                                                 >
-                                                    {r.txHash.slice(0, 10)}...{r.txHash.slice(-6)}
+                                                    {r.txHash.slice(0, 10)}...
+                                                    {r.txHash.slice(-6)}
                                                 </a>
                                             ) : (
                                                 "-"
