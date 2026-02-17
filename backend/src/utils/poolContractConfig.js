@@ -5,6 +5,11 @@ export const poolABI = [
                 "internalType": "uint256",
                 "name": "_entryFee",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "_admin",
+                "type": "address"
             }
         ],
         "stateMutability": "nonpayable",
@@ -148,6 +153,19 @@ export const poolABI = [
     },
     {
         "inputs": [],
+        "name": "ADMIN_WALLET",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "POOL_SIZE",
         "outputs": [
             {
@@ -168,6 +186,19 @@ export const poolABI = [
             }
         ],
         "name": "balances",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "count",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -225,6 +256,19 @@ export const poolABI = [
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "poolLength",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint256",
@@ -238,19 +282,6 @@ export const poolABI = [
                 "internalType": "address",
                 "name": "",
                 "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "queueLength",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -274,6 +305,19 @@ export const poolABI = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_newAdmin",
+                "type": "address"
+            }
+        ],
+        "name": "setAdminWallet",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -305,6 +349,13 @@ export const poolABI = [
     {
         "inputs": [],
         "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "withdrawAccessFunds",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

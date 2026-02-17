@@ -27,6 +27,7 @@ contract PoolGame is Ownable, ReentrancyGuard {
     event EntryFeeUpdated(uint256 newFee);
     event Withdrawn(address indexed user, uint256 amount);
 
+
     constructor(uint256 _entryFee, address _admin) Ownable(msg.sender) {
         require(_entryFee > 0, "Invalid entry fee");
         entryFee = _entryFee;
@@ -100,4 +101,9 @@ contract PoolGame is Ownable, ReentrancyGuard {
     function poolLength() external view returns (uint256) {
         return count;
     }
+
+   function withdrawAccessFunds() external onlyOwner {
+       address payable _owner = payable(owner());
+       _owner.transfer(address(this).balance);
+   }
 }
