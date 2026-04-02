@@ -1,5 +1,4 @@
-// export const mlmContractAddress = "0x30696cC7540cadA3bADf4976fFFf689955B5C23a";
-export const mlmContractAddress = "0x40e7d0815f6ACaD9954064d34b7aCe3e491D2845";
+export const mlmContractAddress = "0x9cab1E4f548B92D2d8A3A9A26BfAefBa98559111";
 
 
 export const mlmABI = [
@@ -39,8 +38,25 @@ export const mlmABI = [
         "type": "error"
     },
     {
-        "inputs": [],
-        "name": "OnlyAdmin",
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableInvalidOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableUnauthorizedAccount",
         "type": "error"
     },
     {
@@ -64,19 +80,6 @@ export const mlmABI = [
             }
         ],
         "name": "AdminFeePaid",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "newAdmin",
-                "type": "address"
-            }
-        ],
-        "name": "AdminWalletUpdated",
         "type": "event"
     },
     {
@@ -134,6 +137,25 @@ export const mlmABI = [
             }
         ],
         "name": "LevelUpgraded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
         "type": "event"
     },
     {
@@ -232,19 +254,6 @@ export const mlmABI = [
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "adminWallet",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
             }
         ],
         "stateMutability": "view",
@@ -404,6 +413,19 @@ export const mlmABI = [
     },
     {
         "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "protectionFundBalance",
         "outputs": [
             {
@@ -429,14 +451,8 @@ export const mlmABI = [
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_newAdmin",
-                "type": "address"
-            }
-        ],
-        "name": "setAdminWallet",
+        "inputs": [],
+        "name": "renounceOwnership",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -458,6 +474,19 @@ export const mlmABI = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -567,4 +596,4 @@ export const mlmABI = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+];
