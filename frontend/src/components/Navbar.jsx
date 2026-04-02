@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useMLMWeb3 } from "../context/MLMWeb3Provider";
+import logo from "../assets/logo.png";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
@@ -53,7 +54,7 @@ export default function Navbar() {
                 {/* Logo */}
                 <div className="flex items-center gap-2">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black flex items-center justify-center border border-white/10">
-                        <img src="/logo.png" alt="logo" className="w-8 sm:w-10" />
+                        <img src={logo} alt="logo" className="w-8 sm:w-10" />
                     </div>
 
                     <p className="font-bold text-base sm:text-lg tracking-wide">
