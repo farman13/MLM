@@ -39,7 +39,7 @@ export default function Register({ bnbPrice, loadingPrice }) {
     const [isRefValid, setIsRefValid] = useState(true);
     const [refError, setRefError] = useState("");
 
-    const REGISTRATION_FEE_USD = 0.15;
+    const REGISTRATION_FEE_USD = 15;
 
     // -----------------------------
     // COPY REFERRAL CODE
