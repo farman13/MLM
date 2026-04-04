@@ -85,6 +85,7 @@ export function PoolWeb3Provider({ children }) {
                 args: [],
             });
         } catch (err) {
+            console.error("Error reading pool length:", err);
             return 0;
         }
     };
@@ -101,6 +102,7 @@ export function PoolWeb3Provider({ children }) {
                 args: [],
             });
         } catch (err) {
+            console.error("Error reading entry fee:", err);
             return 0n;
         }
     };

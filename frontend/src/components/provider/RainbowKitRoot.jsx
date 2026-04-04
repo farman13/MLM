@@ -12,7 +12,7 @@ import {
     walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 
-import { createConfig, WagmiProvider } from "wagmi";
+import { createConfig, WagmiProvider, http } from "wagmi";
 import { sepolia, bsc } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 
 const projectId = "6dd15a3684137adf8eb5ed126f061236";
 
-// ✅ Define ONLY required wallets
+// ✅ Only selected wallets
 const connectors = connectorsForWallets(
     [
         {
@@ -39,10 +39,16 @@ const connectors = connectorsForWallets(
     }
 );
 
-// ✅ Create wagmi config manually
+// ✅ FIX: add transports
 const config = createConfig({
     connectors,
     chains: [sepolia, bsc],
+
+    transports: {
+        [sepolia.id]: http(),
+        [bsc.id]: http(),
+    },
+
     ssr: true,
 });
 

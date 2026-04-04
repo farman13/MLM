@@ -22,7 +22,6 @@ export default function PoolRewards() {
     const loadPoolData = async () => {
         const user = await getPoolLength();
         const fee = await getEntryFee();
-
         setUsers(user);
         setEntryFee(fee);
 
